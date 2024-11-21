@@ -1,0 +1,135 @@
+/* Base blob (mini) */
+.whisper-blob {
+  width: 15px; /* Mini blob size */
+  height: 15px;
+  background-color: #333; /* Dark background */
+  border-radius: 50%; /* Perfect circle */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 9999; /* Ensure it appears above other elements */
+  transform: scaleX(1);
+  transform-origin: center; /* Expansion starts from the center by default */
+  transition: transform 0.3s ease-in-out; /* Smooth scaling animation */
+  position: absolute; /* Ensure it stays aligned to input field */
+  overflow: hidden; /* Prevent content overflow */
+  margin: 0; /* Remove any margin */
+  padding: 0; /* Remove any padding */
+}
+
+/* Expanded blob container */
+.whisper-blob.expanded {
+  width: fit-content;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #333;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease-in-out;
+  overflow: hidden;
+  margin: 0;
+  gap: 5px;
+}
+/* Hide the mini blob in expanded mode */
+.whisper-mini {
+  display: block; /* Mini blob visible by default */
+  transition: opacity 0.2s ease-in-out; /* Smooth fade-out */
+}
+
+.whisper-blob.expanded .whisper-mini {
+  opacity: 0; /* Fade out mini blob when expanded */
+  pointer-events: none; /* Disable interactions with mini blob */
+}
+
+/* Expanded content (buttons container) */
+.whisper-expanded {
+  display: none; /* Initially hidden */
+  flex-direction: row; /* Align buttons horizontally */
+  gap: 4px; /* Spacing between items */
+  margin: 0; /* Ensure no extra space */
+  padding: 0; /* Remove padding */
+  align-items: center; /* Vertical alignment */
+}
+
+.whisper-blob.expanded .whisper-expanded {
+  display: flex; /* Show expanded content when expanded */
+}
+
+/* Divider between buttons */
+.divider {
+  color: white;
+  font-size: 15px;
+  margin: 0 3px;
+}
+
+/* Buttons inside expanded blob */
+#language-btn,
+#mic-btn,
+#settings-btn,
+#minimize-btn,
+#close-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 21px;
+  height: 21px;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0;
+  margin: 0;
+}
+
+/* Hover effect for all buttons */
+#language-btn:hover,
+#mic-btn:hover,
+#settings-btn:hover,
+#minimize-btn:hover,
+#close-btn:hover {
+  background-color: #333;
+  border-radius: 50%;
+  transition: background-color 0.2s ease-in-out;
+}
+
+
+#minimize-btn::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 2px;
+  background-color: white; /* Minimize line */
+  border-radius: 1px;
+  position: absolute;
+}
+
+
+
+/* Dropdown for language selection */
+.language-dropdown {
+  border: none; /* Remove default border */
+  background-color: #444; /* Match dark blob styling */
+  color: white; /* White text for contrast */
+  border-radius: 5px; /* Rounded dropdown edges */
+  padding: 2px 2px; /* Padding for dropdown content */
+  font-size: 10px; /* Font size for readability */
+  cursor: pointer; /* Pointer cursor for dropdown */
+  height: 24px; /* Ensure it aligns with buttons */
+}
+
+/* After selecting, dropdown shows only the shorthand code */
+.language-dropdown:focus-visible option {
+  display: block;
+}
+
+.language-dropdown option {
+  background-color: #333; /* Match expanded blob */
+  color: white; /* White text for contrast */
+}
