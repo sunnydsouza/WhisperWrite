@@ -1,16 +1,14 @@
 let activeInputField = null; // Track the currently focused input field
 
-// Create the main wrapper
-const whisperText = document.createElement("div");
-whisperText.className = "whisper-text";
 
-// Sub-elements: whisper-blob, mic-blob, expanded-blob
-whisperText.innerHTML = `
-  <div class="whisper-blob"></div>
-  <div class="mic-blob">
-    <img style="width:24px;height:24px;object-fit:contain" src="${chrome.runtime.getURL("assets/mic_128.png")}" alt="Mic Icon" />
-  </div>
-  <div class="expanded-blob">
+// Create the blob
+const blob = document.createElement("div");
+const micIconURL = chrome.runtime.getURL("assets/mic_128.png");
+const recordingIconURL = chrome.runtime.getURL("assets/stop.png");
+blob.className = "whisper-blob";
+blob.innerHTML = `
+  <div class="mic-blob"> <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" /></div>
+  <div class="whisper-expanded">
     <button id="drag-btn" aria-label="Drag">&#x2630;</button>
     <select class="language-dropdown">
       <option value="en" selected title="English">🇬🇧 EN</option>
@@ -19,89 +17,82 @@ whisperText.innerHTML = `
       <option value="de" title="Deutsch">🇩🇪 DE</option>
       <option value="zh" title="中文">🇨🇳 ZH</option>
     </select>
-    <button id="mic-btn">
-      <img style="width:24px;height:24px;object-fit:contain" src="${chrome.runtime.getURL("assets/mic_128.png")}" alt="Mic Icon" />
-    </button>
+    <button id="mic-btn"><img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" /></button>
     <button id="settings-btn">⚙️</button>
+    <!--<span class="divider">|</span>
+    <button id="minimize-btn" aria-label="Minimize"></button>-->
     <button id="close-btn">✖</button>
   </div>
 `;
 
-// Append the main wrapper to the document
-document.body.appendChild(whisperText);
-
-// Initialize the positions and hide the sub-elements
-whisperText.style.position = "absolute";
-whisperText.style.left = "10px";
-whisperText.style.top = "10px";
-whisperText.style.display = "none"; // Initially hidden
-
-const whisperBlob = whisperText.querySelector(".whisper-blob");
-const micBlob = whisperText.querySelector(".mic-blob");
-const expandedBlob = whisperText.querySelector(".expanded-blob");
-
-micBlob.style.display = "none";
-expandedBlob.style.display = "none";
+document.body.appendChild(blob);
+blob.style.position = "absolute";
+blob.style.left = "10px";
+blob.style.top = "10px";
+blob.style.display = "none"; // Initially hidden
 
 // Allow dragging via the drag button
 let isDragging = false;
 let offsetX = 0,
   offsetY = 0;
 
-const dragBtn = expandedBlob.querySelector("#drag-btn");
+const dragBtn = blob.querySelector("#drag-btn");
 dragBtn.addEventListener("mousedown", (event) => {
   isDragging = true;
-  offsetX = event.clientX - whisperText.getBoundingClientRect().left;
-  offsetY = event.clientY - whisperText.getBoundingClientRect().top;
-  whisperText.style.cursor = "grabbing";
+  offsetX = event.clientX - blob.getBoundingClientRect().left;
+  offsetY = event.clientY - blob.getBoundingClientRect().top;
+  blob.style.cursor = "grabbing";
 });
 
 document.addEventListener("mousemove", (event) => {
   if (isDragging) {
-    whisperText.style.left = `${event.clientX - offsetX}px`;
-    whisperText.style.top = `${event.clientY - offsetY}px`;
+    blob.style.left = `${event.clientX - offsetX}px`;
+    blob.style.top = `${event.clientY - offsetY}px`;
   }
 });
 
 document.addEventListener("mouseup", () => {
   if (isDragging) {
     isDragging = false;
-    whisperText.style.cursor = "pointer";
+    blob.style.cursor = "pointer";
   }
 });
 
-// Function to reposition the whisperText
+
+
 function repositionBlob(inputField) {
   if (!inputField) return;
 
-  const rect = inputField.getBoundingClientRect();
+  const rect = inputField.getBoundingClientRect(); // Get input field dimensions and position
 
-  // Position the main container near the input field
-  whisperText.style.left = `${rect.left - 25}px`; // Adjust position slightly to the left
-  whisperText.style.top = `${rect.top + rect.height / 2}px`; // Center vertically
-  whisperText.style.display = "flex";
+  // Calculate the parent blob's position relative to the input field
+  const left = rect.left - 25; // Adjust position to the left of the input
+  const top = rect.top + (rect.height / 2); // Vertically align
 
-  // Show the mic-blob briefly for animation
+  // Apply calculated positions to the parent blob
+  blob.style.left = `${left}px`;
+  blob.style.top = `${top}px`;
+  blob.style.display = "inline-flex"; // Ensure visibility
+
+  // Synchronize child element positions via CSS variables
+  blob.style.setProperty("--blob-left", `${left}px`);
+  blob.style.setProperty("--blob-top", `${top}px`);
+
+  // Trigger the mic blob animation for new input focus
+  const micBlob = blob.querySelector(".mic-blob");
   micBlob.style.display = "flex";
+  blob.classList.add("mic-pulse");
+
+  // Hide mic blob after 1 second and revert to mini blob
   setTimeout(() => {
+    blob.classList.remove("mic-pulse");
     micBlob.style.display = "none";
-    whisperBlob.style.display = "block"; // Default state
-  }, 1000); // 1-second delay
+  }, 1000); // 1-second pulsing effect
 }
 
-// Add hover event to show expanded-blob
-whisperText.addEventListener("mouseenter", () => {
-  micBlob.style.display = "none";
-  whisperBlob.style.display = "none";
-  expandedBlob.style.display = "flex"; // Show expanded blob
-});
 
-whisperText.addEventListener("mouseleave", () => {
-  expandedBlob.style.display = "none"; // Hide expanded blob
-  whisperBlob.style.display = "block"; // Restore mini blob
-});
 
-// Add focus and blur listeners to track input fields
+
 document.addEventListener("focusin", (e) => {
   const isTextInput = (element) =>
     ["text", "email", "search", "url", "tel"].includes(element.type) ||
@@ -109,28 +100,33 @@ document.addEventListener("focusin", (e) => {
     element.contentEditable === "true";
 
   if (isTextInput(e.target) && e.target.type !== "password") {
-    activeInputField = e.target;
-    repositionBlob(activeInputField);
+    activeInputField = e.target; // Update the active input field
+    repositionBlob(activeInputField); // Reposition the blob
+    console.log("Focused on:", activeInputField);
   }
 });
 
+
+// Hide the blob on blur
 document.addEventListener("focusout", (e) => {
   setTimeout(() => {
-    if (!whisperText.contains(document.activeElement) && e.target === activeInputField) {
+    if (!blob.contains(document.activeElement) && e.target === activeInputField) {
       activeInputField = null;
-      whisperText.style.display = "none";
+      console.log("Input field blurred. Active field cleared.");
+      blob.style.display = "none";
     }
-  }, 10);
+  }, 10); // Small delay to allow blob interactions
 });
 
 // Handle dictation
-const micBtn = expandedBlob.querySelector("#mic-btn");
-const languageDropdown = expandedBlob.querySelector(".language-dropdown");
+const micBtn = blob.querySelector("#mic-btn");
+const languageDropdown = blob.querySelector(".language-dropdown");
 let isRecording = false;
 let mediaStream = null;
 let audioContext = null;
 let analyser = null;
 let volumeMeter = null;
+
 
 async function startRecording() {
   if (!activeInputField) {
@@ -138,12 +134,19 @@ async function startRecording() {
     return;
   }
 
-  isRecording = true;
-  micBtn.querySelector("img").src = chrome.runtime.getURL("assets/stop.png");
+  console.log("Starting recording for field:", activeInputField);
 
-  whisperBlob.style.display = "none";
-  expandedBlob.style.display = "flex";
-  whisperText.classList.add("recording");
+  isRecording = true;
+  // micBtn.innerText = "⏹️"; // Show stop icon
+  micBtn.querySelector("img").src = recordingIconURL;
+  micBtn.classList.add("recording"); // Turn mic red and pulse
+  blob.classList.add("recording"); // Add pulsing red hue to blob
+  activeInputField.classList.add("active-input-field"); // Highlight active field
+
+  blob.classList.add("expanded");
+
+  // Change the extension icon to "recording"
+  chrome.runtime.sendMessage({ action: "startRecording" });
 
   mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   audioContext = new AudioContext();
@@ -157,12 +160,15 @@ async function startRecording() {
     if (!isRecording) return;
     analyser.getByteFrequencyData(volumeMeter);
     const volume = Math.max(...volumeMeter);
-    whisperText.style.boxShadow = `0 0 0 ${volume / 20}px rgba(255, 0, 0, 1)`;
+    blob.style.boxShadow = `0 0 0 ${volume / 20}px rgba(255, 0, 0, 1)`;
+    console.log(`New boxShadow: 0 0 0 ${volume / 20 }px rgba(255, 0, 0, 1)`)
     requestAnimationFrame(updateVolume);
   };
-
+  
+  
   updateVolume();
-
+  
+  
   const mediaRecorder = new MediaRecorder(mediaStream);
   let audioChunks = [];
 
@@ -176,20 +182,28 @@ async function startRecording() {
     // Stop recording
     mediaRecorder.stop();
     isRecording = false;
+    micBtn.classList.remove("recording");
+    blob.classList.remove("recording");
+    blob.style.boxShadow = "none";
+    if (activeInputField) {
+      activeInputField.classList.remove("active-input-field");
+    }
+    // micBtn.innerText = "🎙️"; // Reset icon
+    micBtn.querySelector("img").src = micIconURL;
+    blob.classList.remove("expanded");
 
-    whisperText.style.boxShadow = "none";
-    whisperBlob.style.display = "block";
-    expandedBlob.style.display = "none";
-
-    micBtn.querySelector("img").src = chrome.runtime.getURL("assets/mic_128.png");
+    // Change the extension icon back to default
+    chrome.runtime.sendMessage({ action: "stopRecording" });
 
     mediaRecorder.onstop = async () => {
+      // Stop the MediaStream tracks
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
       audioContext.close();
 
       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
 
+      // Retrieve the API key from Chrome storage
       chrome.storage.local.get("openaiApiKey", async (result) => {
         const apiKey = result.openaiApiKey;
         if (!apiKey) {
@@ -197,6 +211,7 @@ async function startRecording() {
           return;
         }
 
+        // Prepare FormData for the API request
         const formData = new FormData();
         formData.append("file", audioBlob, "audio.webm");
         formData.append("model", "whisper-1");
@@ -205,28 +220,31 @@ async function startRecording() {
         try {
           const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
             method: "POST",
-            headers: { Authorization: `Bearer ${apiKey}` },
-            body: formData,
+            headers: {
+              Authorization: `Bearer ${apiKey}`, // Use the stored API key
+            },
+            body: formData, // Attach FormData
           });
 
           if (response.ok) {
             const result = await response.json();
-            insertTextAtCursor(result.text);
+            insertTextAtCursor(result.text); // Insert transcribed text at the cursor position
           } else {
             const error = await response.json();
             alert(`Error: ${error.message}`);
           }
         } catch (error) {
           console.error("Error during API call:", error);
+          alert("An error occurred while transcribing audio. Check the console for details.");
         }
       });
 
-      micBtn.onclick = startRecording;
+      micBtn.onclick = startRecording; // Reset mic button
     };
   };
 }
 
-// Insert text into the active input field
+// Insert text at the cursor position in the active input field
 function insertTextAtCursor(text) {
   if (!activeInputField) return;
 
@@ -247,6 +265,26 @@ function insertTextAtCursor(text) {
 
 micBtn.onclick = startRecording;
 
-expandedBlob.querySelector("#close-btn").onclick = () => {
-  whisperText.style.display = "none";
+
+
+
+// Minimize button functionality
+// const minimizeBtn = blob.querySelector("#minimize-btn");
+// minimizeBtn.onclick = () => {
+//   blob.classList.remove("expanded");
+// };
+
+// Close button functionality
+const closeBtn = blob.querySelector("#close-btn");
+closeBtn.onclick = () => {
+  blob.style.display = "none"; // Hide the blob
 };
+
+// Expand and collapse functionality on hover
+blob.addEventListener("mouseenter", () => {
+  if (!isRecording) blob.classList.add("expanded");
+});
+
+blob.addEventListener("mouseleave", () => {
+  if (!isRecording) blob.classList.remove("expanded");
+});
