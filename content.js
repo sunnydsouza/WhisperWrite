@@ -4,6 +4,7 @@ let activeInputField = null; // Track the currently focused input field
 // Create the blob
 const blob = document.createElement("div");
 const micIconURL = chrome.runtime.getURL("assets/mic_128.png");
+const recordingIconURL = chrome.runtime.getURL("assets/stop.png");
 blob.className = "whisper-blob";
 blob.innerHTML = `
   <div class="mic-blob"> <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" /></div>
@@ -65,7 +66,7 @@ function repositionBlob(inputField) {
   const rect = inputField.getBoundingClientRect(); // Get input field dimensions and position
 
   // Calculate the parent blob's position relative to the input field
-  const left = rect.left - 50; // Adjust position to the left of the input
+  const left = rect.left - 25; // Adjust position to the left of the input
   const top = rect.top + (rect.height / 2); // Vertically align
 
   // Apply calculated positions to the parent blob
@@ -91,7 +92,7 @@ function repositionBlob(inputField) {
 
 
 
-// Focus event to track active input, reposition the blob, and show mic glimpse
+
 document.addEventListener("focusin", (e) => {
   const isTextInput = (element) =>
     ["text", "email", "search", "url", "tel"].includes(element.type) ||
@@ -105,12 +106,14 @@ document.addEventListener("focusin", (e) => {
   }
 });
 
+
 // Hide the blob on blur
 document.addEventListener("focusout", (e) => {
   setTimeout(() => {
     if (!blob.contains(document.activeElement) && e.target === activeInputField) {
       activeInputField = null;
       console.log("Input field blurred. Active field cleared.");
+      blob.style.display = "none";
     }
   }, 10); // Small delay to allow blob interactions
 });
@@ -120,6 +123,9 @@ const micBtn = blob.querySelector("#mic-btn");
 const languageDropdown = blob.querySelector(".language-dropdown");
 let isRecording = false;
 let mediaStream = null;
+let audioContext = null;
+let analyser = null;
+let volumeMeter = null;
 
 
 async function startRecording() {
@@ -131,7 +137,8 @@ async function startRecording() {
   console.log("Starting recording for field:", activeInputField);
 
   isRecording = true;
-  micBtn.innerText = "⏹️"; // Show stop icon
+  // micBtn.innerText = "⏹️"; // Show stop icon
+  micBtn.querySelector("img").src = recordingIconURL;
   micBtn.classList.add("recording"); // Turn mic red and pulse
   blob.classList.add("recording"); // Add pulsing red hue to blob
   activeInputField.classList.add("active-input-field"); // Highlight active field
@@ -142,6 +149,26 @@ async function startRecording() {
   chrome.runtime.sendMessage({ action: "startRecording" });
 
   mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  audioContext = new AudioContext();
+  analyser = audioContext.createAnalyser();
+  const source = audioContext.createMediaStreamSource(mediaStream);
+  source.connect(analyser);
+
+  volumeMeter = new Uint8Array(analyser.frequencyBinCount);
+
+  const updateVolume = () => {
+    if (!isRecording) return;
+    analyser.getByteFrequencyData(volumeMeter);
+    const volume = Math.max(...volumeMeter);
+    blob.style.boxShadow = `0 0 0 ${volume / 20}px rgba(255, 0, 0, 1)`;
+    console.log(`New boxShadow: 0 0 0 ${volume / 20 }px rgba(255, 0, 0, 1)`)
+    requestAnimationFrame(updateVolume);
+  };
+  
+  
+  updateVolume();
+  
+  
   const mediaRecorder = new MediaRecorder(mediaStream);
   let audioChunks = [];
 
@@ -157,10 +184,12 @@ async function startRecording() {
     isRecording = false;
     micBtn.classList.remove("recording");
     blob.classList.remove("recording");
+    blob.style.boxShadow = "none";
     if (activeInputField) {
       activeInputField.classList.remove("active-input-field");
     }
-    micBtn.innerText = "🎙️"; // Reset icon
+    // micBtn.innerText = "🎙️"; // Reset icon
+    micBtn.querySelector("img").src = micIconURL;
     blob.classList.remove("expanded");
 
     // Change the extension icon back to default
@@ -170,6 +199,7 @@ async function startRecording() {
       // Stop the MediaStream tracks
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
+      audioContext.close();
 
       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
 

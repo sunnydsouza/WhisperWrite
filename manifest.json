@@ -31,7 +31,7 @@
     },
     "web_accessible_resources": [
     {
-      "resources": ["assets/mic_24.png","assets/mic_128.png"],
+      "resources": ["assets/mic_24.png","assets/mic_128.png","assets/stop.png"],
       "matches": ["<all_urls>"]
     }
 ]
