@@ -7,3 +7,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   });
   
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "getActiveTab") {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        sendResponse(tabs[0]); // Respond with the active tab
+      });
+      return true; // Keep the message channel open for async response
+    }
+  });
+  
