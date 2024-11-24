@@ -57,25 +57,7 @@ document.addEventListener("mouseup", () => {
   }
 });
 
-// Reposition the blob to the left of the active input
-// function repositionBlob(inputField) {
-//   if (!inputField) return;
 
-//   const rect = inputField.getBoundingClientRect();
-//   blob.style.left = `${rect.left - 25}px`; // Adjust position to the left of the input
-//   blob.style.top = `${rect.top + rect.height / 2 - 10}px`;
-//   blob.style.display = "inline-flex"; // Ensure it's visible
-
-//   // Show mic blob for a moment
-//   const micBlob = blob.querySelector(".mic-blob");
-//   micBlob.style.display = "flex"; // Show pulsating mic blob
-//   blob.classList.add("mic-pulse");
-
-//   setTimeout(() => {
-//     blob.classList.remove("mic-pulse");
-//     micBlob.style.display = "none"; // Hide mic blob
-//   }, 1000); // 1-second pulsating effect
-// }
 
 function repositionBlob(inputField) {
   if (!inputField) return;
@@ -84,7 +66,7 @@ function repositionBlob(inputField) {
 
   // Calculate the parent blob's position relative to the input field
   const left = rect.left - 50; // Adjust position to the left of the input
-  const top = rect.top + (rect.height / 2) ; // Vertically align
+  const top = rect.top + (rect.height / 2); // Vertically align
 
   // Apply calculated positions to the parent blob
   blob.style.left = `${left}px`;
@@ -139,100 +121,6 @@ const languageDropdown = blob.querySelector(".language-dropdown");
 let isRecording = false;
 let mediaStream = null;
 
-// async function startRecording() {
-//   if (!activeInputField) {
-//     alert("Please focus on a text input field to use dictation.");
-//     return;
-//   }
-
-//   console.log("Starting recording for field:", activeInputField);
-
-//   isRecording = true;
-//   micBtn.innerText = "⏹️"; // Show stop icon
-//   micBtn.classList.add("recording"); // Turn mic red and pulse
-//   blob.classList.add("recording"); // Add pulsing red hue to blob
-//   activeInputField.classList.add("active-input-field"); // Highlight active field
-  
-//   blob.classList.add("expanded");
-
-//   // Change the extension icon to "recording"
-//   chrome.runtime.sendMessage({ action: "startRecording" });
-
-//   mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-//   const mediaRecorder = new MediaRecorder(mediaStream);
-//   let audioChunks = [];
-
-//   mediaRecorder.ondataavailable = (event) => {
-//     audioChunks.push(event.data);
-//   };
-
-//   mediaRecorder.start();
-
-//   micBtn.onclick = async () => {
-//     // Stop recording
-//     mediaRecorder.stop();
-//     isRecording = false;
-//     micBtn.classList.remove("recording");
-//     blob.classList.remove("recording");
-//     if (activeInputField) {
-//       activeInputField.classList.remove("active-input-field");
-//     }
-//     micBtn.innerText = "🎙️"; // Reset icon
-//     blob.classList.remove("expanded");
-
-//     // Change the extension icon back to default
-//     chrome.runtime.sendMessage({ action: "stopRecording" });
-
-//     mediaRecorder.onstop = async () => {
-//       // Stop the MediaStream tracks
-//       mediaStream.getTracks().forEach((track) => track.stop());
-//       mediaStream = null;
-
-//       const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-
-//       // Retrieve the API key from Chrome storage
-//       chrome.storage.local.get("openaiApiKey", async (result) => {
-//         const apiKey = result.openaiApiKey;
-//         if (!apiKey) {
-//           alert("Please set your OpenAI API key in the extension options.");
-//           return;
-//         }
-
-//         // Prepare FormData for the API request
-//         const formData = new FormData();
-//         formData.append("file", audioBlob, "audio.webm");
-//         formData.append("model", "whisper-1");
-//         formData.append("language", languageDropdown.value);
-
-//         try {
-//           const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-//             method: "POST",
-//             headers: {
-//               Authorization: `Bearer ${apiKey}`, // Use the stored API key
-//             },
-//             body: formData, // Attach FormData
-//           });
-
-//           if (response.ok) {
-//             const result = await response.json();
-//             insertTextAtCursor(result.text); // Insert transcribed text at the cursor position
-//           } else {
-//             const error = await response.json();
-//             alert(`Error: ${error.message}`);
-//           }
-//         } catch (error) {
-//           console.error("Error during API call:", error);
-//           alert("An error occurred while transcribing audio. Check the console for details.");
-//         }
-//       });
-
-//       micBtn.onclick = startRecording; // Reset mic button
-//     };
-//   };
-// }
-
-// Insert text at the cursor position in the active input field
-
 
 async function startRecording() {
   if (!activeInputField) {
@@ -247,7 +135,7 @@ async function startRecording() {
   micBtn.classList.add("recording"); // Turn mic red and pulse
   blob.classList.add("recording"); // Add pulsing red hue to blob
   activeInputField.classList.add("active-input-field"); // Highlight active field
-  
+
   blob.classList.add("expanded");
 
   // Change the extension icon to "recording"
