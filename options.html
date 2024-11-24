@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Whisper Options</title>
-  </head>
-  <body>
-    <h3>Whisper API Key</h3>
-    <label>
-      API Key:
-      <input type="text" id="openai-api-key" />
-    </label>
-    <button id="save-key-btn">Save</button>
-    <script src="options.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <title>Whisper Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+    }
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    input {
+      padding: 6px;
+      width: 100%;
+      margin: 5px 0;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h3>Whisper API Key</h3>
+  <label for="openai-api-key">API Key:</label>
+  <input type="text" id="openai-api-key" />
+  <button id="save-key-btn">Save</button>
+  <script src="options.js"></script>
+</body>
 </html>

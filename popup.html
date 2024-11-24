@@ -1,21 +1,45 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Whisper Settings</title>
-  </head>
-  <body>
-    <h3>Whisper Control</h3>
-    <label>
-      Domain Toggle:
-      <input type="checkbox" id="domain-toggle" />
-    </label>
-    <br />
-    <label>
-      Page Toggle:
-      <input type="checkbox" id="page-toggle" />
-    </label>
-    <br />
-    <button id="save-settings-btn">Save Settings</button>
-    <script src="popup.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <title>Whisper Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+    }
+    h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h3>Whisper Control</h3>
+  <label>
+    Domain Toggle:
+    <input type="checkbox" id="domain-toggle" />
+  </label>
+  <label>
+    Page Toggle:
+    <input type="checkbox" id="page-toggle" />
+  </label>
+  <button id="save-settings-btn">Save Settings</button>
+  <script src="popup.js"></script>
+</body>
 </html>
