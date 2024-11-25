@@ -1,45 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>Whisper Control</title>
   <style>
+    /* General Styles */
     body {
       font-family: Arial, sans-serif;
-      margin: 10px;
+      margin: 5px;
+      background-color: #cdbdbd;
+      /* Dark grey background */
+      color: #000000;
+      /* Light grey text */
+      min-width: 300px;
+      /* Ensure a consistent width for the popup */
+      padding: 5px;
+      box-sizing: border-box;
     }
+
     h3 {
-      font-size: 18px;
-      margin-bottom: 8px;
+      font-size: 12px;
+      /* margin-bottom: 12px; */
+      color: #000000;
+      /* White text for headings */
+      /* text-align: center; */
+      /* Center align the heading */
     }
+
     label {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin: 5px 0;
+      font-size: 16px;
+      color: #000000;
+      /* Slightly lighter grey text */
     }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      background-color: #888888;
+      /* Grey background */
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .toggle-switch input {
+      display: none;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: #ffffff;
+      /* White slider */
+      border-radius: 50%;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    .toggle-switch input:checked+.toggle-slider {
+      transform: translateX(20px);
+      /* Slide to the right */
+      background-color: #4CAF50;
+      /* Green slider when checked */
+    }
+
     button {
-      margin-top: 10px;
-      padding: 8px 12px;
+      margin-top: 15px;
+      padding: 10px 15px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      /* Make the button stretch full width */
+      text-align: center;
+      /* Center-align text */
     }
+
     button:hover {
       background-color: #45a049;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      /* Add subtle shadow on hover */
     }
   </style>
 </head>
+
 <body>
-  <h3>Whisper Control</h3>
-  <label>
-    Domain Toggle:
-    <input type="checkbox" id="domain-toggle" />
-  </label>
-  <label>
-    Page Toggle:
-    <input type="checkbox" id="page-toggle" />
-  </label>
-  <button id="save-settings-btn">Save Settings</button>
+  <h3>Enable on</h3>
+  <div id="dynamic-content">
+    <!-- Dynamic content will be added here -->
+  </div>
   <script src="popup.js"></script>
 </body>
+
 </html>
