@@ -38,23 +38,24 @@ function initializeBlobFunctionality() {
   const recordingIconURL = chrome.runtime.getURL("assets/stop.png");
   blob.className = "whisper-blob";
   blob.innerHTML = `
-    <div class="mic-blob" style="position: relative;">
+    <div class="mic-blob">
       <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" />
     </div>
+    <!--<div class="whisper-tooltip">Start Recording</div>-->
     <div class="whisper-expanded">
-      <button id="drag-btn" aria-label="Drag">&#x2630;</button>
+      <button id="mic-btn">
+        <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" />   
+      </button>
       <select class="language-dropdown">
         <option value="en" selected title="English">🇬🇧 EN</option>
+        <option value="hi" title="हिंदी">🇮🇳 HI</option>
+        <option value="mr" title="मराठी">🇮🇳 MR</option>
         <option value="es" title="Español">🇪🇸 ES</option>
         <option value="fr" title="Français">🇫🇷 FR</option>
         <option value="de" title="Deutsch">🇩🇪 DE</option>
         <option value="zh" title="中文">🇨🇳 ZH</option>
       </select>
-      <button id="mic-btn" style="position: relative;">
-        <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" />
-        
-      </button>
-      <button id="settings-btn">⚙️</button>
+      <button id="drag-btn" aria-label="Drag">&#x2630;</button>
       <button id="close-btn">✖</button>
     </div>
 
@@ -72,6 +73,7 @@ function initializeBlobFunctionality() {
 
   const dragBtn = blob.querySelector("#drag-btn");
   const micBtn = blob.querySelector("#mic-btn");
+  attachTooltipListeners();
 
   // Add drag functionality
   dragBtn.addEventListener("mousedown", (event) => {
@@ -130,11 +132,11 @@ function initializeBlobFunctionality() {
 
     const micBlob = blob.querySelector(".mic-blob");
     if (!isDragging) {
-      micBlob.style.display = "flex";
+      // micBlob.style.display = "flex";
       blob.classList.add("mic-pulse");
       setTimeout(() => {
         blob.classList.remove("mic-pulse");
-        micBlob.style.display = "none";
+        // micBlob.style.display = "flex";
       }, 1000);
     }
   }
@@ -315,12 +317,79 @@ function initializeBlobFunctionality() {
 
   // Expand/collapse on hover
   blob.addEventListener("mouseenter", () => {
-    if (!isRecording) blob.classList.add("expanded");
+    if (!isRecording) { blob.classList.add("expanded");
+      activeInputField.classList.add("active-input-field")
+    }
   });
 
   blob.addEventListener("mouseleave", () => {
-    if (!isRecording) blob.classList.remove("expanded");
+    if (!isRecording) { blob.classList.remove("expanded"); 
+      activeInputField.classList.remove("active-input-field")
+    }
   });
+
+
+  function showTooltip(element, content) {
+    let tooltip = document.querySelector('.whisper-tooltip');
+
+    // Create tooltip if it doesn't exist
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.className = 'whisper-tooltip';
+      document.body.appendChild(tooltip); // Append directly to the body
+    }
+
+    // Update tooltip content
+    tooltip.textContent = content;
+
+    // Position tooltip relative to the hovered element
+    const rect = element.getBoundingClientRect();
+    tooltip.style.left = `${rect.left + rect.width / 2}px`; // Center horizontally
+    tooltip.style.top = `${rect.top - tooltip.offsetHeight - 12}px`; // Position above element
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = '1';
+  }
+
+  // Function to hide tooltip
+  function hideTooltip() {
+    const tooltip = document.querySelector('.whisper-tooltip');
+    if (tooltip) {
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.opacity = '0';
+    }
+  }
+
+  // Attach event listeners to show/hide tooltip with appropriate content
+  function attachTooltipListeners() {
+    const micBtn = document.querySelector('#mic-btn');
+    const languageDropdown = document.querySelector('.language-dropdown');
+    const dragBtn = document.querySelector('#drag-btn');
+    const closeBtn = document.querySelector('#close-btn');
+
+    if (micBtn) {
+      micBtn.addEventListener('mouseenter', () => showTooltip(micBtn, 'Click to start recording'));
+      micBtn.addEventListener('mouseleave', hideTooltip);
+    }
+
+    if (languageDropdown) {
+      languageDropdown.addEventListener('mouseenter', () => showTooltip(languageDropdown, 'Select language to translate to'));
+      languageDropdown.addEventListener('mouseleave', hideTooltip);
+    }
+
+    if (dragBtn) {
+      dragBtn.addEventListener('mouseenter', () => showTooltip(dragBtn, 'Click to drag'));
+      dragBtn.addEventListener('mouseleave', hideTooltip);
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('mouseenter', () => showTooltip(closeBtn, 'Temporarily disable dictate'));
+      closeBtn.addEventListener('mouseleave', hideTooltip);
+    }
+  }
+
+  // Initialize tooltip listeners on page load
+  // document.addEventListener('DOMContentLoaded', attachTooltipListeners);
+
 }
 
 // Remove the blob functionality

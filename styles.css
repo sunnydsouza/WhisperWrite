@@ -1,7 +1,7 @@
 /* Base blob (mini) */
 .whisper-blob {
-  width: 10px; /* Mini blob size */
-  height: 10px;
+  width: 24px; 
+  height: 24px;
   background-color: #333;
   border-radius: 50%;
   display: flex;
@@ -12,13 +12,14 @@
   z-index: 9999;
   transform-origin: center;
   /* transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out; */
-  transition: box-shadow 0.2s ease, transform 0.3s ease, top 0.3s ease, left 0.3s ease;
+  /* transition: box-shadow 0.2s ease, transform 0.3s ease, top 0.3s ease, left 0.3s ease; */
+  transition: transform 0.3s ease-in-out;
   /* transition: transform 0.3s ease-in-out, left 0.3s ease-in-out, top 0.3s ease-in-out; */
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
   position: absolute;
-  overflow: hidden;
+  /* overflow: hidden; */
   margin: 0;
-  margin-top: 5px;
+  /* margin-top: 5px; */
   padding: 0;
 
   /* Custom properties for positioning children */
@@ -30,7 +31,7 @@
 .whisper-blob.expanded {
   position: absolute;
   top: var(--blob-top);
-  left: var(--blob-left);
+  left: calc(var(--blob-left)-50px);
   width: fit-content;
   height: 40px;
   border-radius: 20px;
@@ -43,21 +44,35 @@
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.4);
   transform-origin: center;
   /* transition: all 0.3s ease-in-out; */
-  transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out;
+  /* transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out; */
+  animation: expandBlob 0.6s ease-in-out forwards;
   overflow: hidden;
   gap: 5px;
 }
 
-/* Hide the mini blob in expanded mode */
-.whisper-mini {
-  display: block; /* Mini blob visible by default */
-  transition: opacity 0.2s ease-in-out; /* Smooth fade-out */
+/* Define the stages of the animation */
+@keyframes expandBlob {
+  0% {
+    width: 24px;
+    height: 24px;
+    transform: scale(1);
+  }
+  50% {
+    width: 40px;
+    height: 40px;
+    transform: scale(1.1); /* Slight bounce effect */
+  }
+  100% {
+    width: fit-content;
+    height: 40px; /* Final expanded height */
+    transform: scale(1);
+  }
 }
 
-.whisper-blob.expanded .whisper-mini {
-  opacity: 0; /* Fade out mini blob when expanded */
-  pointer-events: none; /* Disable interactions with mini blob */
+.mic-blob {
+  display: flex;
 }
+
 
 /* Expanded content (buttons container) */
 .whisper-expanded {
@@ -67,6 +82,11 @@
   margin: 0; /* Ensure no extra space */
   padding: 0; /* Remove padding */
   align-items: center; /* Vertical alignment */
+  /* transition: width 4s; */
+}
+
+.whisper-blob.expanded .mic-blob {
+  display: none; 
 }
 
 .whisper-blob.expanded .whisper-expanded {
@@ -300,3 +320,33 @@
     box-shadow: 0 0 10px 2px rgba(255, 0, 0, 0.5);
   }
 }
+
+/* Tooltip styling */
+.whisper-tooltip {
+  position: absolute; /* Positioned relative to its parent */
+  bottom: 150%; /* Position above the parent element */
+  left: 50%; /* Center the tooltip horizontally */
+  transform: translateX(-50%); /* Adjust position for centering */
+  background-color: #333; /* Dark background for the tooltip */
+  color: #fff; /* White text for contrast */
+  padding: 5px 10px; /* Spacing inside the tooltip */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 12px; /* Small font size */
+  text-align: center; /* Center the text */
+  visibility: visible; /* Hidden by default */
+  opacity: 0; /* Fully transparent by default */
+  z-index: 9999; /* Ensure it appears above other elements */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Smooth show/hide animation */
+  pointer-events: none; /* Prevent interactions */
+  min-width: max-content;
+  min-height: max-content;
+}
+
+/* Show the tooltip when the mic-blob is hovered */
+.mic-blob:hover + .whisper-tooltip {
+  visibility: visible; /* Make it visible */
+  opacity: 1; /* Fully opaque */
+  transform: translateX(-50%) translateY(-10px); /* Slightly shift upwards for animation effect */
+}
+
+
