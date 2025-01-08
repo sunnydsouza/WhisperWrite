@@ -1,38 +1,49 @@
-// Load settings when popup opens
 document.addEventListener("DOMContentLoaded", () => {
-    const domainToggle = document.getElementById("domain-toggle");
-    const pageToggle = document.getElementById("page-toggle");
-  
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const url = new URL(tabs[0].url);
-      const domain = url.hostname;
-  
-      chrome.storage.local.get(["settings"], (result) => {
-        const settings = result.settings || {};
-        domainToggle.checked = settings[domain]?.enabled ?? true;
-        pageToggle.checked = settings[domain]?.pages?.[url.pathname] ?? true;
-      });
+  const dynamicContent = document.getElementById("dynamic-content");
+
+  // Query the active tab to get the current URL
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const url = new URL(tabs[0].url);
+    const domain = url.hostname;
+
+    // Inject dynamic content with domain-specific labels
+    dynamicContent.innerHTML = `
+      <label>
+        <strong>${domain}</strong>
+        <div class="toggle-switch">
+          <input type="checkbox" id="domain-toggle" />
+          <div class="toggle-slider"></div>
+        </div>
+      </label>
+    `;
+
+    // Fetch saved settings and apply toggle states
+    chrome.storage.local.get(["settings"], (result) => {
+      const settings = result.settings || {};
+      document.getElementById("domain-toggle").checked =
+        settings[domain]?.enabled ?? true;
     });
-  
-    // Save settings
-    document.getElementById("save-settings-btn").onclick = () => {
+
+    // Add event listener to automatically save settings on toggle
+    document.querySelector("#domain-toggle").addEventListener("change", (e) => {
+      const isEnabled = e.target.checked;
+    
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const url = new URL(tabs[0].url);
         const domain = url.hostname;
-        const pathname = url.pathname;
-  
+    
         chrome.storage.local.get(["settings"], (result) => {
           const settings = result.settings || {};
           if (!settings[domain]) settings[domain] = { enabled: true, pages: {} };
-  
-          settings[domain].enabled = domainToggle.checked;
-          settings[domain].pages[pathname] = pageToggle.checked;
-  
+    
+          settings[domain].enabled = isEnabled;
+    
           chrome.storage.local.set({ settings }, () => {
-            alert("Settings saved!");
+            console.log(`Domain ${domain} toggle set to ${isEnabled}`);
           });
         });
       });
-    };
+    });
+    
   });
-  
+});
