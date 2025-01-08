@@ -1,14 +1,26 @@
 # **Whisper Extension: Voice-to-Text Assistant for Input Fields**
 
 ## **Purpose**
-The Whisper Extension provides a seamless voice-to-text solution for input fields in web applications, leveraging OpenAI's Whisper API. Designed to enhance productivity and accessibility, it allows users to dictate text directly into any supported input field. Whisper ensures high accuracy transcription in multiple languages, making this extension suitable for diverse use cases.
+Revolutionize Your Productivity with AI-Powered Voice Transcription
 
+Effortlessly transcribe, dictate, and translate on any webpage with the power of OpenAI's Whisper API. Whisper Mic Assistant integrates seamlessly into your browser, turning voice inputs into accurate text in multiple languages or translating speech directly to English.
+
+Key Features:
+
+- Smooth, dynamic UI for dictation and translation.
+- Language-specific transcription or speech-to-text capabilities.
+- Drag-and-drop repositionable mic control for effortless use.
+- Automatic language translation to English for global communication.
+- Intuitive toggles and settings for domain-specific customization.
+- Empower your workflow with Whisper Mic Assistant—voice technology redefined.
 ---
 
 ## **Exclusive Features**
 ### **1. Adaptive Floating Blob**
 - **Miniature Mode**: A small blob icon stays docked near input fields and is draggable for convenience.
 - **Hover Expansion**: The blob expands on hover, revealing buttons for microphone, settings, and other functionalities.
+
+![Extension in action](docs/in_action.mp4)
 
 ### **2. Multi-Language Support**
 - Select from multiple languages for transcription, including English, Spanish, French, German, and Chinese.
@@ -35,9 +47,10 @@ The Whisper Extension provides a seamless voice-to-text solution for input field
 
 ---
 
-## **Screenshots**
+## **Video**
 
-### coming soon...
+![Whisper Extension](docs/guide_1.mp4)
+
 
 ---
 
