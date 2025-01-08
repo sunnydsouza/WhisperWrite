@@ -3,7 +3,21 @@ let isDragging = false; // Flag for drag operation
 let offsetX = 0, offsetY = 0; // Drag offsets
 const blobPositions = {}; // Store custom positions per input field
 let blobListenersInitialized = false; // Prevent duplicate listeners
+// Store the full list of options
+const fullLanguageOptions = `
+  <option value="en" selected title="English">🇬🇧 EN</option>
+  <option value="es" title="Español">🇪🇸 ES</option>
+  <option value="fr" title="Français">🇫🇷 FR</option>
+  <option value="de" title="Deutsch">🇩🇪 DE</option>
+  <option value="zh" title="中文">🇨🇳 ZH</option>
+  <option value="hi" title="हिंदी">🇮🇳 HI</option>
+  <option value="mr" title="मराठी">🇮🇳 MR</option>
+`;
 
+// Option for English only
+const englishOnlyOption = `
+  <option value="en" selected title="English">🇬🇧 EN</option>
+`;
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "updateToggle") {
@@ -46,6 +60,10 @@ function initializeBlobFunctionality() {
       <button id="mic-btn">
         <img style="width:24px;height:24px;object-fit: contain" src="${micIconURL}" alt="Mic Icon" />   
       </button>
+      <select class="mode-dropdown">
+        <option value="dictate" selected>Dictate in</option>
+        <option value="translate">Translate to</option>
+      </select>
       <select class="language-dropdown">
         <option value="en" selected title="English">🇬🇧 EN</option>
         <option value="hi" title="हिंदी">🇮🇳 HI</option>
@@ -73,6 +91,8 @@ function initializeBlobFunctionality() {
 
   const dragBtn = blob.querySelector("#drag-btn");
   const micBtn = blob.querySelector("#mic-btn");
+  const languageDropdown = blob.querySelector(".language-dropdown");
+  const modeDropdown = blob.querySelector(".mode-dropdown");
   attachTooltipListeners();
 
   // Add drag functionality
@@ -108,6 +128,26 @@ function initializeBlobFunctionality() {
         saveBlobPositions(); // Persist positions to storage
       }
     }
+  });
+
+  // Update language dropdown based on mode
+  modeDropdown.addEventListener("change", () => {
+    if (modeDropdown.value === "translate") {
+      languageDropdown.innerHTML = englishOnlyOption; // Restrict to English
+      languageDropdown.disabled = true; // Optional: Disable dropdown since only one option
+    } else {
+      languageDropdown.innerHTML = fullLanguageOptions; // Restore full list
+      languageDropdown.disabled = false; // Enable dropdown for selection
+    }
+  });
+
+  // Tooltip update based on mode
+  modeDropdown.addEventListener("change", () => {
+    const tooltip = document.querySelector(".whisper-tooltip");
+    tooltip.textContent =
+      modeDropdown.value === "translate"
+        ? "Mode: Translate to English"
+        : "Mode: Dictate in selected language";
   });
 
   // Reposition the blob based on input or custom positions
@@ -189,7 +229,7 @@ function initializeBlobFunctionality() {
 
   // Load positions when the page loads
   loadBlobPositions();
-  const languageDropdown = blob.querySelector(".language-dropdown");
+
   let isRecording = false;
   let mediaStream = null;
   let audioContext = null;
@@ -247,7 +287,6 @@ function initializeBlobFunctionality() {
         const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
         console.log("Audio recorded successfully.");
 
-
         // Retrieve the API key from Chrome storage
         chrome.storage.local.get("openaiApiKey", async (result) => {
           const apiKey = result.openaiApiKey;
@@ -260,10 +299,20 @@ function initializeBlobFunctionality() {
           const formData = new FormData();
           formData.append("file", audioBlob, "audio.webm");
           formData.append("model", "whisper-1");
-          formData.append("language", languageDropdown.value);
+
+          // Determine the endpoint and additional parameters
+          const selectedMode = modeDropdown.value; // "dictate" or "translate"
+          const endpoint =
+            selectedMode === "translate"
+              ? "https://api.openai.com/v1/audio/translations"
+              : "https://api.openai.com/v1/audio/transcriptions";
+
+          if (selectedMode === "dictate") {
+            formData.append("language", languageDropdown.value); // Specify language for dictation
+          }
 
           try {
-            const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            const response = await fetch(endpoint, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${apiKey}`, // Use the stored API key
@@ -273,20 +322,22 @@ function initializeBlobFunctionality() {
 
             if (response.ok) {
               const result = await response.json();
-              insertTextAtCursor(result.text); // Insert transcribed text at the cursor position
+              insertTextAtCursor(result.text); // Insert transcribed/translated text
             } else {
               const error = await response.json();
               alert(`Error: ${error.message}`);
             }
           } catch (error) {
             console.error("Error during API call:", error);
-            alert("An error occurred while transcribing audio. Check the console for details.");
+            alert("An error occurred while processing audio. Check the console for details.");
           }
         });
 
         micBtn.onclick = startRecording;
       };
     };
+
+
   }
 
   // Insert text at the cursor position in the active input field
@@ -304,7 +355,7 @@ function initializeBlobFunctionality() {
       const range = selection.getRangeAt(0);
       range.deleteContents();
       range.insertNode(document.createTextNode(text));
-      range.collapse(false);
+      // range.collapse(false);
     }
   }
 
@@ -317,13 +368,15 @@ function initializeBlobFunctionality() {
 
   // Expand/collapse on hover
   blob.addEventListener("mouseenter", () => {
-    if (!isRecording) { blob.classList.add("expanded");
+    if (!isRecording) {
+      blob.classList.add("expanded");
       activeInputField.classList.add("active-input-field")
     }
   });
 
   blob.addEventListener("mouseleave", () => {
-    if (!isRecording) { blob.classList.remove("expanded"); 
+    if (!isRecording) {
+      blob.classList.remove("expanded");
       activeInputField.classList.remove("active-input-field")
     }
   });
@@ -363,6 +416,7 @@ function initializeBlobFunctionality() {
   function attachTooltipListeners() {
     const micBtn = document.querySelector('#mic-btn');
     const languageDropdown = document.querySelector('.language-dropdown');
+    const modeDropdown = blob.querySelector(".mode-dropdown");
     const dragBtn = document.querySelector('#drag-btn');
     const closeBtn = document.querySelector('#close-btn');
 
@@ -374,6 +428,11 @@ function initializeBlobFunctionality() {
     if (languageDropdown) {
       languageDropdown.addEventListener('mouseenter', () => showTooltip(languageDropdown, 'Select language to translate to'));
       languageDropdown.addEventListener('mouseleave', hideTooltip);
+    }
+
+    if (modeDropdown) {
+      modeDropdown.addEventListener('mouseenter', () => showTooltip(modeDropdown, 'Either dictate in or translate to selected language'));
+      modeDropdown.addEventListener('mouseleave', hideTooltip);
     }
 
     if (dragBtn) {
