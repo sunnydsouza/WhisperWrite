@@ -49,7 +49,7 @@ Key Features:
 
 ## **Video**
 
-![Whisper Extension](https://youtu.be/-2meGMWIkfU?si=vIdS2cyg5gMpN9Dp)
+[![In Action](https://img.youtube.com/vi/-2meGMWIkfU/0.jpg)](https://www.youtube.com/watch?v=-2meGMWIkfU)
 
 
 ---
@@ -71,8 +71,8 @@ Key Features:
 ### **For Developers**
 1. **Clone Repository**:
    ```bash
-   git clone https://github.com/sunnydsouza/whisper-extension.git
-   cd whisper-extension
+   git clone https://github.com/sunnydsouza/WhisperWrite.git
+   cd WhisperWrite
    ```
 2. **Install Dependencies**:
    - Install dependencies if applicable for the development setup (e.g., `npm install`).
