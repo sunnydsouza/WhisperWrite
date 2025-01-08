@@ -58,7 +58,7 @@ Key Features:
 
 ### **For Users**
 1. **Download Extension**: 
-   - Download the extension `.zip` from [GitHub Releases](https://github.com/sunnydsouza/whisper-extension/releases).
+   - Download the extension `.zip` from [GitHub Releases](https://github.com/sunnydsouza/WhisperWrite).
    - Extract the contents of the `.zip` file.
 2. **Install Locally**:
    - Open Chrome and navigate to `chrome://extensions/`.
