@@ -350,3 +350,24 @@
 }
 
 
+.mode-dropdown {
+  max-width: fit-content;
+  border: none;
+  background-color: #444;
+  color: white;
+  border-radius: 5px;
+  padding: 2px 5px;
+  font-size: 10px;
+  cursor: pointer;
+  height: 24px;
+}
+
+.mode-dropdown:focus-visible option {
+  display: block;
+}
+
+.mode-dropdown option {
+  background-color: #333;
+  color: white;
+}
+
