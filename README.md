@@ -20,7 +20,7 @@ Key Features:
 - **Miniature Mode**: A small blob icon stays docked near input fields and is draggable for convenience.
 - **Hover Expansion**: The blob expands on hover, revealing buttons for microphone, settings, and other functionalities.
 
-![Extension in action](docs/in_action.mp4)
+![Extension in action](docs/in_action.gif)
 
 ### **2. Multi-Language Support**
 - Select from multiple languages for transcription, including English, Spanish, French, German, and Chinese.
@@ -49,7 +49,7 @@ Key Features:
 
 ## **Video**
 
-![Whisper Extension](docs/guide_1.mp4)
+![Whisper Extension](https://youtu.be/-2meGMWIkfU?si=vIdS2cyg5gMpN9Dp)
 
 
 ---
